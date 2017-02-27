@@ -1,0 +1,5 @@
+project/project/
+project/target/
+target/*
+.idea/
+src/main/resources/dev.conf
