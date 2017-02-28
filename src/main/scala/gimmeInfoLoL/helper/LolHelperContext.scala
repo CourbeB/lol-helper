@@ -17,6 +17,7 @@ object LolHelperContext {
 
   val apiKeyDiscord = applicationConf.getString("api.key.Discord")
   val apiKeyChampionGG = applicationConf.getString("api.key.ChampionGG")
+  val apiKeyLol = applicationConf.getString("api.key.LoL")
 
   object implicits {
     implicit val system = ActorSystem()
