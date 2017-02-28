@@ -4,6 +4,7 @@ import gimmeInfoLoL.helper.LolHelperContext
 import sx.blah.discord.handle.obj.IMessage
 
 import play.api.libs.json.Json
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 /**
@@ -30,7 +31,7 @@ object Itemset {
 
     (champ, position) match {
       case (Some(c), Some(p)) => answer(c, correctPosition(p), message)
-      case (_, _) =>
+      case (_, _) => errorCommand(message)
     }
   }
 
@@ -52,19 +53,29 @@ object Itemset {
 //        else Left(r.json.as[ChampionUnknow])
 //    }
 
-    val a = for {
+    val response = for {
+      //Future
       itemsSets <- wsClient.url(request1).get().map {
-        r => r.json.as[Array[ItemsSet]]
+        r => if (r.status == 200) Future.successful(r.json.as[Array[ItemsSet]]) else Future.failed(new Exception)
       }
+      test <- itemsSets
     } yield for{
-      itemsSet <- itemsSets
-      item <- itemsSet.items
+      //Option
+      items <- test.map(e => (e.role, e.items)).toMap.get(position)
     } yield for{
+      //Array
+      item <-items
+    } yield for{
+      //Future
       itemName <- wsClient.url(makeRequest(item.toString)).get().map{r=>r.json.as[Item]}
     } yield itemName.name
 
-    a.map(_.toList.sequence).flatten.onComplete{
-      case Success(msg) => println(msg)
+    val formatedResponse = response.flatMap{
+      case Some(e) => Future.sequence(e.toList)
+    }
+
+    formatedResponse.onComplete{
+      case Success(msg) => println(msg.mkString(", "))
       case Failure(e) => println(e)
     }
 
@@ -75,4 +86,11 @@ object Itemset {
 //    }
   }
 
+  def unknowChampion(message: IMessage)={
+    message.getChannel.sendMessage("`Unknown champion`")
+  }
+
+  def errorCommand(message: IMessage)={
+    message.getChannel.sendMessage("`You need to specify a correct champion and position (ie: !lol item quinn top)`")
+  }
 }
