@@ -1,4 +1,9 @@
 language: scala
 jdk: oraclejdk8
 scala:
-   - 2.11.8
+- 2.11.8
+deploy:
+  provider: heroku
+  app: lol-helper
+  api_key:
+    secure: pxBXYUKtqbqIwuhO6MHSDSkmcgujVas8nHDO5hqgOn1kLXpM/gg8Gg47/a095ui7Fz5beB/M/uXXUPDK11LFyEbic+ZTFaPwOqnpIFMDj0pTjvjpznwsVH1+KdlBxqpW5oY9ptn0FxQcKepEieHrBm2dS+nDMxR+Ugyz2TFDbEC7YayIq8oQHBQReu22ENHIS+DL2MKZ++jlRlhGhYe5vXnTTTbSR3YsfxJLKOneK6rmaAhLLh6Sz2dKgyrzznIGM3vvwoDQx3nJhewljglZqrcHPzBxFE+kozZ9HCMBh8Ko/qWq+dIU896zwO5MzI4kumDFYFfXNC3W+DFigBsO3WEev4VcJbrjRe/MWFDj66Q0jOn6QIma5FM1GaFkJhw+yDTw9cXorxuvE7hfjGQ1A4LvdptIfcM7J4K7YD9YZQhjlLLbQzfrC84SZFuVZUE2pLZzjqId8PZaOXbWgdNvz946geLekDp9zpxTsGocgoU+5QTGvXl19v/F01N6Xi+NOnysM5ylJsmLQHQe5Ob0/daOKkJUtya5l7VzB4pVDeATcYXWgvkrXDVaDaCeZrg7xaajsh6h1iCttdbmn6sXiICw9b7elsysntNkyE766FLPcChHhi6MbDygYGTB5UBCikwBSQv0ELszC3Ly2xhrPrm1ZVWhkR6pgFhqyM0nLpw=
