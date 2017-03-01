@@ -16,7 +16,7 @@ object LolHelperContext {
 
   case class Config(apiKeyDiscord: String, apiKeyChampionGG: String, apiKeyLol: String)
 
-  val config = sys.props.getOrElse("env", "prod") match {
+  val config = envOrElse("environment", "prod") match {
     case env if env=="prod" => Config(sys.env("DISCORD"), sys.env("CHAMPION_GG"), sys.env("LOL"))
     case env if env=="dev" =>
       val applicationConf = ConfigFactory.parseResources(getClass, s"/$env.conf")
