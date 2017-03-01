@@ -14,12 +14,22 @@ import scala.util.Properties.envOrElse
   */
 object LolHelperContext {
 
-  //ConfigFactory.parseFile(new File(s"myconf.conf"))
-  val applicationConf = ConfigFactory.parseResources(getClass, "/dev.conf")
+  case class Config(apiKeyDiscord: String, apiKeyChampionGG: String, apiKeyLol: String)
 
-  val apiKeyDiscord = envOrElse("DISCORD", applicationConf.getString("api.key.Discord"))
-  val apiKeyChampionGG = envOrElse("CHAMPION_GG", applicationConf.getString("api.key.ChampionGG"))
-  val apiKeyLol = envOrElse("LOL", applicationConf.getString("api.key.LoL"))
+  val config = sys.props.getOrElse("env", "prod") match {
+    case env if env=="prod" => Config(sys.env("DISCORD"), sys.env("CHAMPION_GG"), sys.env("LOL"))
+    case env if env=="dev" =>
+      val applicationConf = ConfigFactory.parseResources(getClass, s"/$env.conf")
+      Config(
+        applicationConf.getString("api.key.Discord"),
+        applicationConf.getString("api.key.ChampionGG"),
+        applicationConf.getString("api.key.LoL")
+      )
+  }
+
+  val apiKeyDiscord = config.apiKeyDiscord
+  val apiKeyChampionGG = config.apiKeyChampionGG
+  val apiKeyLol = config.apiKeyLol
 
   object implicits {
     implicit val system = ActorSystem()
