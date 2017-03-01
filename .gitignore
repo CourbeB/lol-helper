@@ -3,3 +3,4 @@ project/target/
 target/*
 .idea/
 src/main/resources/dev.conf
+src/main/resources/example.html

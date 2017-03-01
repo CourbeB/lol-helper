@@ -1,3 +1,5 @@
+enablePlugins(JavaAppPackaging)
+
 name := "LoLHepler"
 
 version := "1.0"
