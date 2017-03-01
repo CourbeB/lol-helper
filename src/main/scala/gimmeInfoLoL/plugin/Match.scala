@@ -1,11 +1,12 @@
 package gimmeInfoLoL.plugin
 
 import gimmeInfoLoL.helper.Tabulator
+import gimmeInfoLoL.helper.ImplicitHelpers._
 
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.util.{Success, Failure}
-import sx.blah.discord.handle.obj.{IChannel, IMessage}
+import sx.blah.discord.handle.obj.IMessage
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import play.api.libs.json._
@@ -39,31 +40,31 @@ object Match {
     }
 
     response.onComplete{
-      case Success(info) => answer(info, message.getChannel)
+      case Success(info) => answer(info, message)
       case Failure(e) => println(e)
     }
   }
 
-  def answer(lolNexusResponse: LolNexusResponse, channel: IChannel):Unit ={
+  def answer(lolNexusResponse: LolNexusResponse, message: IMessage):Unit ={
     lolNexusResponse match {
-      case LolNexusResponse(false, html) => answerNotInGame(html, channel)
-      case LolNexusResponse(true, html) => answerInGame(html, channel)
+      case LolNexusResponse(false, html) => answerNotInGame(html, message)
+      case LolNexusResponse(true, html) => answerInGame(html, message)
     }
   }
 
-  def answerNotInGame(s: String, channel: IChannel): Unit={
+  def answerNotInGame(s: String, message: IMessage): Unit={
     val browser = JsoupBrowser()
     val doc = browser.parseString(s)
     val result = doc >> extractor("div", text)
-    channel.sendMessage(result.mkString(""))
+    message.post(result.mkString(""))
   }
 
-  def answerInGame(s: String, channel: IChannel): Unit={
+  def answerInGame(s: String, message: IMessage): Unit={
     val browser = JsoupBrowser()
     val doc = browser.parseString(s)
 
-    channel.sendMessage(formatTeam(doc, 1))
-    channel.sendMessage(formatTeam(doc, 2))
+    message.post(formatTeam(doc, 1))
+    message.post(formatTeam(doc, 2))
   }
 
   def formatTeam(doc: Document, team: Int) : String ={

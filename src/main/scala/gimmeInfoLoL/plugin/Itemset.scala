@@ -1,6 +1,7 @@
 package gimmeInfoLoL.plugin
 
 import gimmeInfoLoL.helper.LolHelperContext
+import gimmeInfoLoL.helper.ImplicitHelpers._
 import sx.blah.discord.handle.obj.IMessage
 
 import play.api.libs.json.Json
@@ -46,51 +47,56 @@ object Itemset {
 
     import gimmeInfoLoL.helper.LolHelperContext.implicits._
 
-//    val response = wsClient.url(request1).get().map{
-//      r =>
-//        if(r.status == 200)
-//          Right(r.json.as[Array[ItemsSet]])
-//        else Left(r.json.as[ChampionUnknow])
-//    }
-
     val response = for {
       //Future
-      itemsSets <- wsClient.url(request1).get().map {
-        r => if (r.status == 200) Future.successful(r.json.as[Array[ItemsSet]]) else Future.failed(new Exception)
+      itemsSetsF <- wsClient.url(request1).get().map {
+        r => if (r.status == 200) Future.successful(r.json.as[Array[ItemsSet]]) else Future.failed(new Exception("Champion not found"))
       }
-      test <- itemsSets
+      itemsSets <- itemsSetsF
     } yield for{
       //Option
-      items <- test.map(e => (e.role, e.items)).toMap.get(position)
+      items <- itemsSets.map(e => (e.role, e.items)).toMap.get(position)
     } yield for{
       //Array
       item <-items
     } yield for{
       //Future
-      itemName <- wsClient.url(makeRequest(item.toString)).get().map{r=>r.json.as[Item]}
-    } yield itemName.name
+      itemNameF <- wsClient.url(makeRequest(item.toString)).get().map{
+        r=> if (r.status == 200) Future.successful((r.json \ "name").as[String]) else Future.failed(new Exception("Item not found"))
+      }
+      itemName <- itemNameF
+    } yield itemName
 
     val formatedResponse = response.flatMap{
       case Some(e) => Future.sequence(e.toList)
+      case None => Future.failed(new Exception("Role not found"))
     }
 
     formatedResponse.onComplete{
-      case Success(msg) => println(msg.mkString(", "))
-      case Failure(e) => println(e)
+      case Success(msg) => message.post(formatAnswer(msg))
+      case Failure(e) if e.getMessage == "Role not found" => unknowRole(message)
+      case Failure(e) if e.getMessage == "Champion not found" => unknowChampion(message)
+      case Failure(e) if e.getMessage == "Item not found" => unknowItem(message)
     }
+  }
 
-//    response.onComplete{
-//      case Success(Right(info)) => message.getChannel.sendMessage(formatAnswer(info, position))
-//      case Success(Left(_)) => unknowChampion(message)
-//      case Failure(e) => println(e)
-//    }
+  def formatAnswer(itemList : List[String]): String ={
+    s"You should start with ${itemList.mkString(", ")}."
   }
 
   def unknowChampion(message: IMessage)={
-    message.getChannel.sendMessage("`Unknown champion`")
+    message.post("`Unknown champion`")
+  }
+
+  def unknowItem(message: IMessage)={
+    message.post("`Unknown item`")
+  }
+
+  def unknowRole(message: IMessage)={
+    message.post("`Unknown role`")
   }
 
   def errorCommand(message: IMessage)={
-    message.getChannel.sendMessage("`You need to specify a correct champion and position (ie: !lol item quinn top)`")
+    message.post("`You need to specify a correct champion and position (ie: !lol item quinn top)`")
   }
 }

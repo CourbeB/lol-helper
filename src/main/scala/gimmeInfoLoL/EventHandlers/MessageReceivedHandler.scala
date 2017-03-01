@@ -44,6 +44,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
       |!lol match summoner-name - Get rank, champ, winrate, and games for all players in a current match
       |!lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
       |!lol counter champion-name position - Get the top 10 counters for a Champion and Position
+      |!lol items champ-name position - Get the highest win starting item sets for a Champion and Position
       |!lol help - Give the list of all commands
       |```
     """.stripMargin

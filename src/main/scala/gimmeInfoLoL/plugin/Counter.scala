@@ -3,6 +3,7 @@ package gimmeInfoLoL.plugin
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import gimmeInfoLoL.helper.{LolHelperContext, Tabulator}
+import gimmeInfoLoL.helper.ImplicitHelpers._
 import play.api.libs.json.Json
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import sx.blah.discord.handle.obj.IMessage
@@ -51,7 +52,7 @@ object Counter {
     }
 
     response.onComplete{
-      case Success(Right(info)) => message.getChannel.sendMessage(formatAnswer(info, position))
+      case Success(Right(info)) => message.post(formatAnswer(info, position))
       case Success(Left(_)) => unknowChampion(message)
       case Failure(e) => println(e)
     }
@@ -72,14 +73,14 @@ object Counter {
   }
 
   def unknowChampion(message: IMessage)={
-    message.getChannel.sendMessage("`Unknown champion`")
+    message.post("`Unknown champion`")
   }
 
   def unknownPosition(message: IMessage)={
-    message.getChannel.sendMessage(s"`Unknown position, correct positions are ${correctPosition.keys.mkString(", ")}.`")
+    message.post(s"`Unknown position, correct positions are ${correctPosition.keys.mkString(", ")}.`")
   }
 
   def errorCommand(message: IMessage)={
-    message.getChannel.sendMessage("`You need to specify a correct champion and position (ie: !lol counter quinn top)`")
+    message.post("`You need to specify a correct champion and position (ie: !lol counter quinn top)`")
   }
 }
