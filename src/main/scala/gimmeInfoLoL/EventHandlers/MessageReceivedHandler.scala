@@ -1,4 +1,4 @@
-package gimmeInfoLoL.EventHandlers
+package gimmeInfoLoL.eventHandlers
 
 import com.typesafe.scalalogging.LazyLogging
 import gimmeInfoLoL.plugin.{Itemset, Counter, BestChampPosition, Match}

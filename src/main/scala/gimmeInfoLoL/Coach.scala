@@ -1,6 +1,6 @@
 package gimmeInfoLoL
 
-import gimmeInfoLoL.EventHandlers.MessageReceivedHandler
+import gimmeInfoLoL.eventHandlers.{MentionReceivedHandler, MessageReceivedHandler}
 import sx.blah.discord.api._
 
 /**
@@ -10,4 +10,5 @@ class Coach(token:String) {
   val client = new ClientBuilder().withToken(token).login()
 
   client.getDispatcher.registerListener(new MessageReceivedHandler())
+  client.getDispatcher.registerListener(new MentionReceivedHandler())
 }
