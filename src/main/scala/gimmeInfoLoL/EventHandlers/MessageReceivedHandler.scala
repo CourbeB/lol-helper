@@ -1,7 +1,7 @@
 package gimmeInfoLoL.EventHandlers
 
 import com.typesafe.scalalogging.LazyLogging
-import gimmeInfoLoL.plugin.{Counter, BestChampPosition, Match}
+import gimmeInfoLoL.plugin.{Itemset, Counter, BestChampPosition, Match}
 import sx.blah.discord.api.events.IListener
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent
 import sx.blah.discord.handle.obj.IMessage
@@ -22,6 +22,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
       case lolnexus if lolnexus.startsWith("!lol match") => fakeTyping(message, Match.apply)
       case bestPosition if bestPosition.startsWith("!lol best") => fakeTyping(message, BestChampPosition.apply)
       case counter if counter.startsWith("!lol counter") => fakeTyping(message, Counter.apply)
+      case itemset if itemset.startsWith("!lol items") => fakeTyping(message, Itemset.apply)
       case help if help.startsWith("!lol help") => fakeTyping(message, printHelp)
       case withoutCommand if withoutCommand.startsWith("!lol") => message.getChannel.sendMessage("`Unknown command`")
         fakeTyping(message, printHelp)
@@ -43,6 +44,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
       |!lol match summoner-name - Get rank, champ, winrate, and games for all players in a current match
       |!lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
       |!lol counter champion-name position - Get the top 10 counters for a Champion and Position
+      |!lol items champ-name position - Get the highest win starting item sets for a Champion and Position
       |!lol help - Give the list of all commands
       |```
     """.stripMargin

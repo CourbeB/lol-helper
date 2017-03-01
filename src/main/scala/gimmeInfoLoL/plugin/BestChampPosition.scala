@@ -3,6 +3,7 @@ package gimmeInfoLoL.plugin
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import gimmeInfoLoL.helper.{LolHelperContext, Tabulator}
+import gimmeInfoLoL.helper.ImplicitHelpers._
 import play.api.libs.json._
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import sx.blah.discord.handle.obj.{IChannel, IMessage}
@@ -60,7 +61,7 @@ object BestChampPosition {
     }
 
     response.onComplete{
-      case Success(info) => message.getChannel.sendMessage(formatAnswer(info))
+      case Success(info) => message.post(formatAnswer(info))
       case Failure(e) => println(e)
     }
   }
@@ -72,7 +73,7 @@ object BestChampPosition {
   }
 
   def unknownPosition(message: IMessage)={
-    message.getChannel.sendMessage(s"`Unknown position, correct positions are ${correctPosition.mkString(", ")}.`")
+    message.post(s"`Unknown position, correct positions are ${correctPosition.mkString(", ")}.`")
   }
 
 }
