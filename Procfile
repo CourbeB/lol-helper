@@ -1,1 +1,1 @@
-worker: target/universal/stage/bin/lolhepler
+bot: target/universal/stage/bin/lolhepler
