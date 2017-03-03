@@ -33,7 +33,11 @@ object Counter {
     val position = content(3).map(_.toLowerCase)
 
     (champ, position) match {
-      case (Some(c), Some(p)) => answer(c, correctPosition(p), message)
+      case (Some(c), Some(p)) =>
+        correctPosition.get(p) match {
+          case Some(value) => answer(c, value, message)
+          case None => unknownPosition(message)
+        }
       case (_, _) => errorCommand(message)
     }
   }
