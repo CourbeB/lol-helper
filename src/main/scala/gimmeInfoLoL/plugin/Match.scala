@@ -70,7 +70,7 @@ object Match {
   def formatTeam(doc: Document, team: Int) : String ={
     val namesTeam = "Name" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.name", texts)).toList
     val champTeam = "Champion" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.champion", texts)).toList
-    val rankTeam = "Current" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.current-season", texts)).toList
+    val rankTeam = "Current" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.current-season", texts)).toList.map(removePromoteGames)
     val lastrRankTeam = "Last" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.last-season", texts)).toList
     val winRateTeam = "Win Rate" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.ranked-wins-losses", texts)).toList
     val kdaTeam = "KDA" +: (doc >> extractor(s"div .team-$team > table > tbody > tr > td.champion-kda", texts)).toList
@@ -85,6 +85,10 @@ object Match {
     s"Team $team :\n```"+Tabulator.format(
       List(namesTeam, champTeam, rankTeam, lastrRankTeam, winRateTeam, kdaTeam, masteriesTeam, summonersTeam).transpose
     )+"```"
+  }
+
+  private def removePromoteGames(s: String): String ={
+    s.substring(0, s.indexOf(')') + 1)
   }
 
   /*
