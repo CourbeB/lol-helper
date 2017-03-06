@@ -1,4 +1,4 @@
-package gimmeInfoLoL.EventHandlers
+package gimmeInfoLoL.eventHandlers
 
 import com.typesafe.scalalogging.LazyLogging
 import gimmeInfoLoL.plugin.{Itemset, Counter, BestChampPosition, Match}
@@ -19,7 +19,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
     logger.info(s"Received message from $author : $content")
 
     content match {
-      case lolnexus if lolnexus.startsWith("!lol match") => fakeTyping(message, Match.apply)
+      case lolnexus if lolnexus.startsWith("!lol nexus") => fakeTyping(message, Match.apply)
       case bestPosition if bestPosition.startsWith("!lol best") => fakeTyping(message, BestChampPosition.apply)
       case counter if counter.startsWith("!lol counter") => fakeTyping(message, Counter.apply)
       case itemset if itemset.startsWith("!lol items") => fakeTyping(message, Itemset.apply)
@@ -41,7 +41,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
     val man = """
       |```
       |Here is the list of all available commands :
-      |!lol match summoner-name - Get rank, champ, winrate, and games for all players in a current match
+      |!lol nexus summoner-name - Get rank, champ, winrate, and games for all players in a current match
       |!lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
       |!lol counter champion-name position - Get the top 10 counters for a Champion and Position
       |!lol items champ-name position - Get the highest win starting item sets for a Champion and Position
