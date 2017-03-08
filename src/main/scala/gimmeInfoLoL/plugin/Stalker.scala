@@ -49,7 +49,7 @@ object Stalker {
     import gimmeInfoLoL.helper.LolHelperContext.implicits._
 
     def getSummoner(name: String): EitherT[Future, String, Summoner] = {
-      val url = s"https://euw.api.pvp.net/api/lol/euw/v1.4/summoner/by-name/${name.replaceFirst(" ", "%20")}?api_key=$apiKeyLol"
+      val url = s"https://euw.api.pvp.net/api/lol/euw/v1.4/summoner/by-name/${name.replace(" ", "%20")}?api_key=$apiKeyLol"
       EitherT(wsClient.url(url).get()
         .map {
           r =>
@@ -85,7 +85,7 @@ object Stalker {
   def formatAnswer(participants: Array[CurrentGameParticipant]) = {
     val nameAndUrl = participants.map{s =>
       val name = s.summonerName
-      val url = s"https://euw.op.gg/summoner/userName=$name"
+      val url = s"<https://euw.op.gg/summoner/userName=${name.replace(" ", "%20")}>"
       s"$name -> $url"}
     nameAndUrl.mkString("\n")
   }
