@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/CourbeB/lol-helper.svg?branch=master)](https://travis-ci.org/CourbeB/lol-helper)
 
-This bot is still on development with limited access (waiting for an official api key from League of Legend).
+This bot is still in development with limited access (waiting for an official api key from League of Legend).
 
 Available commands
 ------------------
