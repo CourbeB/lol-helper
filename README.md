@@ -19,7 +19,7 @@ TODO
 ----
 - [ ] Refactor `!lol nexus` (use official api rather than scraping lol-nexus)
 - [x] Refactor `!lol items` (use `EitherT` rather than multiple for comprehension)
-- [ ] Add `!lol clear` to remove all messages from lol-helper in the current channel
+- [x] Add `!lol clear` to remove all messages from lol-helper in the current channel
 - [ ] Add `!lol version`
-- [ ] Refactor `Stalker` : create case class for error, create a new object for all requests
+- [x] Refactor `Stalker` : create case class for error, create a new object for all requests
 - [ ] Etc.
