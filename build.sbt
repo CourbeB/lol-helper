@@ -20,5 +20,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging"           % "3.1.0",
   "com.typesafe.play"          %% "play-ahc-ws-standalone"  % "1.0.0-M3",
   "net.ruippeixotog"           %% "scala-scraper"           % "1.2.0",
-  "com.typesafe"                % "config"                  % "1.3.1"
+  "com.typesafe"                % "config"                  % "1.3.1",
+  "org.typelevel"              %% "cats"                    % "0.9.0"
 )

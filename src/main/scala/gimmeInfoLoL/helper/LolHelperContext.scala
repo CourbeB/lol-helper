@@ -1,7 +1,5 @@
 package gimmeInfoLoL.helper
 
-import java.io.File
-
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
