@@ -83,11 +83,18 @@ object Stalker {
   }
 
   def formatAnswer(participants: Array[CurrentGameParticipant]) = {
-    val nameAndUrl = participants.map{s =>
-      val name = s.summonerName
-      val url = s"<https://euw.op.gg/summoner/userName=${name.replace(" ", "%20")}>"
-      s"$name -> $url"}
-    nameAndUrl.mkString("\n")
+    def formatTeam(teamId: Long, team: Array[CurrentGameParticipant]): String={
+      val nameAndUrl = team.map{s =>
+        val name = s.summonerName
+        val url = s"<https://euw.op.gg/summoner/userName=${name.replace(" ", "%20")}>"
+        s"$name -> $url"}
+      s"Team $teamId : \n" + nameAndUrl.mkString("\n")
+    }
+
+    participants
+      .groupBy(_.teamId)
+      .map(t => formatTeam(t._1, t._2))
+      .mkString("\n")
   }
 
   def unknowSummoner(message: IMessage) = message.post("Summoner not found.")

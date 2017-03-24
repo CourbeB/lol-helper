@@ -1,6 +1,10 @@
 package gimmeInfoLoL.plugin
 
+import cats._
+import cats.implicits._
+import cats.data.EitherT
 import gimmeInfoLoL.helper.LolHelperContext
+import gimmeInfoLoL.helper.LolHelperContext._
 import gimmeInfoLoL.helper.ImplicitHelpers._
 import sx.blah.discord.handle.obj.IMessage
 
@@ -37,46 +41,60 @@ object Itemset {
   }
 
   def answer(champ: String, position: String, message: IMessage)={
-    val apiTokenChampionGG = LolHelperContext.apiKeyChampionGG
-    val apiTokenLol = LolHelperContext.apiKeyLol
-    val request1  = s"http://api.champion.gg/champion/$champ/items/starters/mostWins?api_key=$apiTokenChampionGG"
-
-    def makeRequest(id: String): String={
-      s"https://global.api.pvp.net/api/lol/static-data/euw/v1.2/item/$id?api_key=$apiTokenLol"
-    }
 
     import gimmeInfoLoL.helper.LolHelperContext.implicits._
 
-    val response = for {
-      //Future
-      itemsSetsF <- wsClient.url(request1).get().map {
-        r => if (r.status == 200) Future.successful(r.json.as[Array[ItemsSet]]) else Future.failed(new Exception("Champion not found"))
-      }
-      itemsSets <- itemsSetsF
-    } yield for{
-      //Option
-      items <- itemsSets.map(e => (e.role, e.items)).toMap.get(position)
-    } yield for{
-      //Array
-      item <-items
-    } yield for{
-      //Future
-      itemNameF <- wsClient.url(makeRequest(item.toString)).get().map{
-        r=> if (r.status == 200) Future.successful((r.json \ "name").as[String]) else Future.failed(new Exception("Item not found"))
-      }
-      itemName <- itemNameF
-    } yield itemName
-
-    val formatedResponse = response.flatMap{
-      case Some(e) => Future.sequence(e.toList)
-      case None => Future.failed(new Exception("Role not found"))
+    def getItemsSets(champ: String): EitherT[Future, String, Array[ItemsSet]] = {
+      val url = s"http://api.champion.gg/champion/$champ/items/starters/mostWins?api_key=$apiKeyChampionGG"
+      EitherT(wsClient.url(url).get()
+        .map(
+          r =>
+            if (r.status == 200) Right(r.json.as[Array[ItemsSet]])
+            else Left("Champion not found")
+        ))
     }
 
-    formatedResponse.onComplete{
-      case Success(msg) => message.post(formatAnswer(msg))
-      case Failure(e) if e.getMessage == "Role not found" => unknowRole(message)
-      case Failure(e) if e.getMessage == "Champion not found" => unknowChampion(message)
-      case Failure(e) if e.getMessage == "Item not found" => unknowItem(message)
+    def getItemName(id: Int): EitherT[Future, String, String] = {
+      val url = s"https://global.api.pvp.net/api/lol/static-data/euw/v1.2/item/$id?api_key=$apiKeyLol"
+      EitherT(wsClient.url(url).get()
+        .map(
+          r =>
+            if (r.status == 200) Right((r.json \ "name").as[String])
+            else Left("Item not found")
+        ))
+    }
+
+    def getItemsForPosition(arrItems: Array[ItemsSet], position: String): EitherT[Future, String, List[Int]] = {
+      val ids = arrItems.map(e => (e.role, e.items)).toMap.get(position)
+      EitherT(ids match {
+        case Some(arr) => Future.successful(Right(arr.toList))
+        case None => Future.successful(Left("Role not found"))
+      })
+    }
+
+    def processItems(itemsList:List[EitherT[Future, String, String]], message: IMessage)={
+      Future.sequence(itemsList.map(_.value)).onComplete{
+        case Success(items) => items.sequenceU match {
+          case Left(e) => unknowItem(message)
+          case Right(itemsName) => message.post(formatAnswer(itemsName))
+        }
+        case Failure(_) =>
+      }
+    }
+
+    val result = for {
+      itemsSets <- getItemsSets(champ)
+      items <- getItemsForPosition(itemsSets, position) } yield for {
+      item <- items } yield for {
+      itemName <- getItemName(item)
+    } yield itemName
+
+    result.value.onComplete{
+      case Success(Left(e)) if e == "Champion not found" => unknowChampion(message)
+      case Success(Left(e)) if e == "Item not found" => unknowItem(message)
+      case Success(Left(e)) if e == "Role not found" => unknowRole(message)
+      case Success(Right(items)) => processItems(items, message)
+      case Failure(_) =>
     }
   }
 
