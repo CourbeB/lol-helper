@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IMessage
 /**
   * Created by bcourbe on 23/02/2017.
   */
-class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLogging {
+class MessageReceivedHandler(botName: String) extends IListener[MessageReceivedEvent] with LazyLogging {
 
   override def handle(event: MessageReceivedEvent) = {
     val message = event.getMessage
@@ -24,6 +24,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
       case bestPosition if bestPosition.startsWith("!lol best") => fakeTyping(message, BestChampPosition.apply)
       case counter if counter.startsWith("!lol counter") => fakeTyping(message, Counter.apply)
       case itemset if itemset.startsWith("!lol items") => fakeTyping(message, Itemset.apply)
+      case clear if clear.startsWith("!lol clear") => Clear(message, botName)
       case help if help.startsWith("!lol help") => fakeTyping(message, printHelp)
       case withoutCommand if withoutCommand.startsWith("!lol") => message.getChannel.sendMessage("`Unknown command`")
         fakeTyping(message, printHelp)
@@ -47,6 +48,7 @@ class MessageReceivedHandler extends IListener[MessageReceivedEvent] with LazyLo
       |!lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
       |!lol counter champion-name position - Get the top 10 counters for a Champion and Position
       |!lol items champ-name position - Get the highest win starting item sets for a Champion and Position
+      |!lol clear - Remove all message from the bot in the current channel
       |!lol help - Give the list of all commands
       |```
     """.stripMargin

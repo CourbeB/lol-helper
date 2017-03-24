@@ -9,5 +9,5 @@ import sx.blah.discord.api._
 class Coach(token:String) {
   val client = new ClientBuilder().withToken(token).login()
 
-  client.getDispatcher.registerListener(new MessageReceivedHandler())
+  client.getDispatcher.registerListener(new MessageReceivedHandler(client.getApplicationName))
 }
