@@ -1,6 +1,6 @@
 package gimmeInfoLoL.plugin
 
-import akka.actor.FSM.Failure
+import com.typesafe.scalalogging.LazyLogging
 import gimmeInfoLoL.helper.Errors._
 import gimmeInfoLoL.helper.ImplicitHelpers._
 import gimmeInfoLoL.helper.LolHelperContext._
@@ -12,13 +12,13 @@ import cats.implicits._
 import cats.data.EitherT
 
 import scala.concurrent.Future
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 
 /**
   * Created by bcourbe on 06/03/2017.
   */
-object Stalker {
+object Stalker extends LazyLogging{
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -80,6 +80,7 @@ object Stalker {
     result.value.onComplete{
       case Success(Left(e:Error)) => e sendTo channel
       case Success(Right(gameParticipants)) => channel sendMessage formatAnswer(gameParticipants)
+      case Failure(_) => logger.error("Error in getting the results for stalker command")
     }
   }
 

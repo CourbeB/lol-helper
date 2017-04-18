@@ -3,6 +3,7 @@ package gimmeInfoLoL.plugin
 import cats._
 import cats.implicits._
 import cats.data.EitherT
+import com.typesafe.scalalogging.LazyLogging
 import gimmeInfoLoL.helper.LolHelperContext
 import gimmeInfoLoL.helper.LolHelperContext._
 import gimmeInfoLoL.helper.ImplicitHelpers._
@@ -16,7 +17,7 @@ import scala.util.{Failure, Success}
 /**
   * Created by bcourbe on 27/02/2017.
   */
-object Itemset {
+object Itemset extends LazyLogging {
 
   import scala.concurrent.ExecutionContext.Implicits._
   val correctPosition = Map("top"->"Top", "jungle"->"Jungle", "middle"->"Middle", "adc"->"ADC", "support"->"Support")
@@ -79,7 +80,7 @@ object Itemset {
           case Left(e:Error) => e sendTo channel
           case Right(itemsName) => channel.sendMessage(formatAnswer(itemsName))
         }
-        case Failure(_) =>
+        case Failure(_) => logger.error("Error in processing the items")
       }
     }
 
@@ -95,7 +96,7 @@ object Itemset {
     result.value.onComplete{
       case Success(Left(e:Error)) => e sendTo channel
       case Success(Right(items)) => processItems(items, channel)
-      case Failure(_) =>
+      case Failure(_) => logger.error("Error in getting the items")
     }
   }
 
