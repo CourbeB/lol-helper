@@ -20,7 +20,7 @@ class MessageReceivedHandler(botName: String) extends IListener[MessageReceivedE
 
     content match {
       case lolnexus if lolnexus.startsWith("!lol nexus") => fakeTyping(message, Match.apply)
-      case stalker if stalker.startsWith("!lol stalker") => fakeTyping(message, Stalker.apply)
+      case opgg if opgg.startsWith("!lol opgg") => fakeTyping(message, Stalker.apply)
       case bestPosition if bestPosition.startsWith("!lol best") => fakeTyping(message, BestChampPosition.apply)
       case counter if counter.startsWith("!lol counter") => fakeTyping(message, Counter.apply)
       case itemset if itemset.startsWith("!lol items") => fakeTyping(message, Itemset.apply)
@@ -44,7 +44,7 @@ class MessageReceivedHandler(botName: String) extends IListener[MessageReceivedE
       |```
       |Here is the list of all available commands :
       |!lol nexus summoner-name - Get rank, champ, winrate, and games for all players in a current match
-      |!lol stalker summoner-name - Get all the OP.GG profiles in a current match
+      |!lol opgg summoner-name - Get all the OP.GG profiles in a current match
       |!lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
       |!lol counter champion-name position - Get the top 10 counters for a Champion and Position
       |!lol items champ-name position - Get the highest win starting item sets for a Champion and Position

@@ -80,7 +80,7 @@ object Stalker extends LazyLogging{
     result.value.onComplete{
       case Success(Left(e:Error)) => e sendTo channel
       case Success(Right(gameParticipants)) => channel sendMessage formatAnswer(gameParticipants)
-      case Failure(_) => logger.error("Error in getting the results for stalker command")
+      case Failure(_) => logger.error("Error in getting the results for opgg command")
     }
   }
 
