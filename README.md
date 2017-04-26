@@ -8,7 +8,7 @@ Available commands
 ------------------
 ```
 !lol nexus summoner-name - Get rank, champ, winrate, and games for all players in a current match
-!lol stalker summoner-name - Get all the OP.GG profiles in a current match
+!lol opgg summoner-name - Get all the OP.GG profiles in a current match
 !lol best position - Get the top 10 best champs for a position [top, middle, jungle, adc, support]
 !lol counter champion-name position - Get the top 10 counters for a Champion and Position
 !lol items champ-name position - Get the highest win starting item sets for a Champion and Position
