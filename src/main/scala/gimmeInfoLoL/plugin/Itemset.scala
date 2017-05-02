@@ -3,10 +3,12 @@ package gimmeInfoLoL.plugin
 import cats._
 import cats.implicits._
 import cats.data.EitherT
+import com.typesafe.scalalogging.LazyLogging
 import gimmeInfoLoL.helper.LolHelperContext
 import gimmeInfoLoL.helper.LolHelperContext._
 import gimmeInfoLoL.helper.ImplicitHelpers._
-import sx.blah.discord.handle.obj.IMessage
+import gimmeInfoLoL.helper.Errors._
+import sx.blah.discord.handle.obj.{IChannel, IMessage}
 
 import play.api.libs.json.Json
 import scala.concurrent.Future
@@ -15,7 +17,7 @@ import scala.util.{Failure, Success}
 /**
   * Created by bcourbe on 27/02/2017.
   */
-object Itemset {
+object Itemset extends LazyLogging {
 
   import scala.concurrent.ExecutionContext.Implicits._
   val correctPosition = Map("top"->"Top", "jungle"->"Jungle", "middle"->"Middle", "adc"->"ADC", "support"->"Support")
@@ -44,41 +46,41 @@ object Itemset {
 
     import gimmeInfoLoL.helper.LolHelperContext.implicits._
 
-    def getItemsSets(champ: String): EitherT[Future, String, Array[ItemsSet]] = {
+    def getItemsSets(champ: String): EitherT[Future, Error, Array[ItemsSet]] = {
       val url = s"http://api.champion.gg/champion/$champ/items/starters/mostWins?api_key=$apiKeyChampionGG"
       EitherT(wsClient.url(url).get()
         .map(
           r =>
             if (r.status == 200) Right(r.json.as[Array[ItemsSet]])
-            else Left("Champion not found")
+            else Left(UnknowChampionError)
         ))
     }
 
-    def getItemName(id: Int): EitherT[Future, String, String] = {
+    def getItemName(id: Int): EitherT[Future, Error, String] = {
       val url = s"https://global.api.pvp.net/api/lol/static-data/euw/v1.2/item/$id?api_key=$apiKeyLol"
       EitherT(wsClient.url(url).get()
         .map(
           r =>
             if (r.status == 200) Right((r.json \ "name").as[String])
-            else Left("Item not found")
+            else Left(UnknowItemError)
         ))
     }
 
-    def getItemsForPosition(arrItems: Array[ItemsSet], position: String): EitherT[Future, String, List[Int]] = {
+    def getItemsForPosition(arrItems: Array[ItemsSet], position: String): EitherT[Future, Error, List[Int]] = {
       val ids = arrItems.map(e => (e.role, e.items)).toMap.get(position)
       EitherT(ids match {
         case Some(arr) => Future.successful(Right(arr.toList))
-        case None => Future.successful(Left("Role not found"))
+        case None => Future.successful(Left(UnknowRoleError))
       })
     }
 
-    def processItems(itemsList:List[EitherT[Future, String, String]], message: IMessage)={
+    def processItems(itemsList:List[EitherT[Future, Error, String]], channel: IChannel)={
       Future.sequence(itemsList.map(_.value)).onComplete{
         case Success(items) => items.sequenceU match {
-          case Left(e) => unknowItem(message)
-          case Right(itemsName) => message.post(formatAnswer(itemsName))
+          case Left(e:Error) => e sendTo channel
+          case Right(itemsName) => channel.sendMessage(formatAnswer(itemsName))
         }
-        case Failure(_) =>
+        case Failure(_) => logger.error("Error in processing the items")
       }
     }
 
@@ -89,29 +91,17 @@ object Itemset {
       itemName <- getItemName(item)
     } yield itemName
 
+    val channel = message.getChannel
+
     result.value.onComplete{
-      case Success(Left(e)) if e == "Champion not found" => unknowChampion(message)
-      case Success(Left(e)) if e == "Item not found" => unknowItem(message)
-      case Success(Left(e)) if e == "Role not found" => unknowRole(message)
-      case Success(Right(items)) => processItems(items, message)
-      case Failure(_) =>
+      case Success(Left(e:Error)) => e sendTo channel
+      case Success(Right(items)) => processItems(items, channel)
+      case Failure(_) => logger.error("Error in getting the items")
     }
   }
 
   def formatAnswer(itemList : List[String]): String ={
     s"You should start with ${itemList.mkString(", ")}."
-  }
-
-  def unknowChampion(message: IMessage)={
-    message.post("`Unknown champion`")
-  }
-
-  def unknowItem(message: IMessage)={
-    message.post("`Unknown item`")
-  }
-
-  def unknowRole(message: IMessage)={
-    message.post("`Unknown role`")
   }
 
   def errorCommand(message: IMessage)={
